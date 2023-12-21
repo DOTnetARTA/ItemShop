@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ItemShop.Exceptions
 {
@@ -29,19 +31,21 @@ namespace ItemShop.Exceptions
 
         private static Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-            var response = new
+            var response = context.Response;
+            response.ContentType = "application/json";
+            switch (ex)
             {
-                error = new
-                {
-                    message = "An error occurred while processing your request.",
-                    details = ex.Message
-                }
-            };
-
-            return context.Response.WriteAsync(JsonConvert.SerializeObject(response));
+                case NotFoundException e:
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case SqlException e:
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+                default:
+                    response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
+            }
+            return context.Response.WriteAsync(JsonConvert.SerializeObject(new { message = ex?.Message }));
         }
     }
 }

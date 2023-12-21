@@ -18,36 +18,36 @@ namespace ItemShop.Repositories
             _context = context;
         }
 
-        public ItemEntity GetItem(int id)
+        public async Task <ItemEntity> GetItem(int id)
         {
-            return _context.Items.FirstOrDefault(item => item.Id == id) ?? throw new NullReferenceException("Item not found Null returned");
+             return await _context.Items.FirstOrDefaultAsync(item => item.Id == id) ?? throw new NullReferenceException("Item not found Null returned");
         }
 
-        public IEnumerable<ItemEntity> GetItems()
+        public async Task<IEnumerable<ItemEntity>> GetItems()
         {
-            return _context.Items.ToList();
+            return await _context.Items.ToListAsync();
         }
 
-        public int UpdateItem(ItemEntity itemEntityt)
+        public async Task UpdateItem(ItemEntity itemEntityt)
         {
             _context.Entry(itemEntityt).State = EntityState.Modified;
 
-            return _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public int DeleteItem(ItemEntity itemEntity)
+        public async Task DeleteItem(ItemEntity itemEntity)
         {
             _context.Items.Remove(itemEntity);
 
-            return _context.SaveChanges();
+             await _context.SaveChangesAsync();
 
         }
 
-        public int CreateItem(ItemEntity itemEntity)
+        public async Task CreateItem(ItemEntity itemEntity)
         {
             _context.Items.Add(itemEntity);
 
-            return _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }

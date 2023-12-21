@@ -1,6 +1,8 @@
 ﻿using ItemShop.Dtos;
 using ItemShop.Entities;
+using ItemShop.Exceptions;
 using ItemShop.Repositories;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,9 +17,9 @@ namespace ItemShop.Services
             _itemRepository = itemRepository;
         }
 
-        public ItemEntity GetItem(int id)
+        public async Task <ItemEntity> GetItem(int id)
         {
-            return _itemRepository.GetItem(id);
+            return await _itemRepository.GetItem(id);
         }
 
 
@@ -25,59 +27,72 @@ namespace ItemShop.Services
         {
             var items = _itemRepository.GetItems();
 
-            return items.Any() ? items : throw new Exception("Item not found");
+            return items.Any() ? items : throw new NotFoundException();
         }
 
-        public int UpdateItem(ItemForUpdateDto item)
+        public async Task UpdateItem(ItemForUpdateDto item)
         {
-            var itemEntity = GetItem(item.Id);
-
-            if (itemEntity != null)
+            try
             {
+                var itemEntity = await GetItem(item.Id);
+
+                if (itemEntity == null)
+                {
+                    throw new NotFoundException();
+                }
+
                 itemEntity.Price = item.Price;
                 itemEntity.Name = item.Name;
 
-                int result = _itemRepository.UpdateItem(itemEntity);
-
-                return result != 0
-                    ? result
-                    : throw new InvalidOperationException("Update failed. Item not found or no changes were made.");
+                await _itemRepository.UpdateItem(itemEntity);
 
             }
-
-            throw new NullReferenceException("Item not found");
-        }
-
-        public int CreateItem(ItemForCreateDto item)
-        {
-            var itemEntity = new ItemEntity
+            catch (SqlException ex)
             {
-                Name = item.Name,
-                Price = item.Price,
-            };
-
-            int result = _itemRepository.CreateItem(itemEntity);
-
-            return result != 0
-                   ? result
-                   : throw new InvalidOperationException("Create failed. Item not found or no changes were made.");
-        }
-
-        public int DeleteItem(int id)
-        {
-            var itemEntity = GetItem(id);
-
-            if (itemEntity != null)
-            {
-                int result = _itemRepository.DeleteItem(itemEntity);
-
-                return result != 0
-                    ? result
-                    : throw new InvalidOperationException("Delete failed. Item not found or no changes were made.");
-
+                throw new SqlException("Update item", ex);
             }
 
-            throw new NullReferenceException("Item not found");
+        }
+
+        public void CreateItem(ItemForCreateDto item)
+        {
+            try
+            {
+                var itemEntity = new ItemEntity
+                {
+                    Name = item.Name,
+                    Price = item.Price,
+                };
+
+                _itemRepository.CreateItem(itemEntity);
+
+            }
+            catch (SqlException ex)
+            {
+                throw new SqlException("CreateItem", ex);
+            }
+
+        }
+
+        public void DeleteItem(int id)
+        {
+            try
+            {
+                var itemEntity = GetItem(id);
+
+                if (itemEntity == null)
+                {
+                    throw new NotFoundException();
+
+                }
+
+                _itemRepository.DeleteItem(itemEntity);
+            }
+            catch (SqlException ex)
+            {
+                throw new SqlException("DeleteItem", ex);
+            }
+
         }
 
     }

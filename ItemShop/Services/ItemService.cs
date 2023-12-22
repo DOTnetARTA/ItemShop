@@ -2,98 +2,75 @@
 using ItemShop.Entities;
 using ItemShop.Exceptions;
 using ItemShop.Repositories;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.EntityFrameworkCore;
 
 namespace ItemShop.Services
 {
     public class ItemService
     {
-        private readonly ItemRepository _itemRepository;
+        private readonly IItemRepository _itemRepository;
 
-        public ItemService(ItemRepository itemRepository)
+        public ItemService(IItemRepository itemRepository)
         {
             _itemRepository = itemRepository;
         }
 
-        public async Task <ItemEntity> GetItem(int id)
+        public async Task<ItemEntity> Get(int id)
         {
-            return await _itemRepository.GetItem(id);
+            return await _itemRepository.Get(id) ?? throw new NotFoundException();
         }
 
 
-        public IEnumerable<ItemEntity> GetItems()
+        public async Task<IEnumerable<ItemEntity>> Get()
         {
-            var items = _itemRepository.GetItems();
+
+            var items = await _itemRepository.Get();
 
             return items.Any() ? items : throw new NotFoundException();
+
         }
 
-        public async Task UpdateItem(ItemForUpdateDto item)
+        public async Task Update(ItemForUpdateDto item)
         {
-            try
+            var itemEntity = await Get(item.Id) ?? throw new NotFoundException();
+
+            itemEntity.Price = item.Price;
+            itemEntity.Name = item.Name;
+
+            var result = await _itemRepository.Update(itemEntity);
+
+            if (result == 0)
             {
-                var itemEntity = await GetItem(item.Id);
-
-                if (itemEntity == null)
-                {
-                    throw new NotFoundException();
-                }
-
-                itemEntity.Price = item.Price;
-                itemEntity.Name = item.Name;
-
-                await _itemRepository.UpdateItem(itemEntity);
-
+                throw new Exception();
             }
-            catch (SqlException ex)
-            {
-                throw new SqlException("Update item", ex);
-            }
-
         }
 
-        public void CreateItem(ItemForCreateDto item)
+        public async Task Create(ItemForCreateDto item)
         {
-            try
+            var itemEntity = new ItemEntity
             {
-                var itemEntity = new ItemEntity
-                {
-                    Name = item.Name,
-                    Price = item.Price,
-                };
+                Name = item.Name,
+                Price = item.Price,
+            };
 
-                _itemRepository.CreateItem(itemEntity);
+            var result = await _itemRepository.Create(itemEntity);
 
-            }
-            catch (SqlException ex)
+            if (result == 0)
             {
-                throw new SqlException("CreateItem", ex);
+                throw new Exception();
             }
-
         }
 
-        public void DeleteItem(int id)
+        public async Task Delete(int id)
         {
-            try
+            var itemEntity = await Get(id) ?? throw new NotFoundException();
+
+            var result = await _itemRepository.Delete(itemEntity);
+
+            if (result == 0)
             {
-                var itemEntity = GetItem(id);
-
-                if (itemEntity == null)
-                {
-                    throw new NotFoundException();
-
-                }
-
-                _itemRepository.DeleteItem(itemEntity);
+                throw new Exception();
             }
-            catch (SqlException ex)
-            {
-                throw new SqlException("DeleteItem", ex);
-            }
-
         }
-
     }
 }
+

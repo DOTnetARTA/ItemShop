@@ -10,7 +10,7 @@ using static Dapper.SqlMapper;
 
 namespace ItemShop.Repositories
 {
-    public class ItemRepository
+    public class ItemRepository : IItemRepository
     {
         private readonly ApiContext _context;
         public ItemRepository(ApiContext context)
@@ -18,36 +18,38 @@ namespace ItemShop.Repositories
             _context = context;
         }
 
-        public async Task <ItemEntity> GetItem(int id)
+        public async Task<ItemEntity?> Get(int id)
         {
-             return await _context.Items.FirstOrDefaultAsync(item => item.Id == id) ?? throw new NullReferenceException("Item not found Null returned");
+            return await _context.Items.FirstOrDefaultAsync(item => item.Id == id);
+
         }
 
-        public async Task<IEnumerable<ItemEntity>> GetItems()
+        public async Task<IEnumerable<ItemEntity>> Get()
         {
             return await _context.Items.ToListAsync();
+
         }
 
-        public async Task UpdateItem(ItemEntity itemEntityt)
+        public async Task<int> Update(ItemEntity itemEntityt)
         {
             _context.Entry(itemEntityt).State = EntityState.Modified;
 
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteItem(ItemEntity itemEntity)
+        public async Task<int> Delete(ItemEntity itemEntity)
         {
             _context.Items.Remove(itemEntity);
 
-             await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
 
         }
 
-        public async Task CreateItem(ItemEntity itemEntity)
+        public async Task<int> Create(ItemEntity itemEntity)
         {
             _context.Items.Add(itemEntity);
 
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
     }
 }

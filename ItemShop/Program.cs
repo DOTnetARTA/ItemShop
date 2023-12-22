@@ -16,21 +16,17 @@ namespace ItemShop
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            string connection = builder.Configuration.GetConnectionString("connection") ?? throw new Exception("Connection string is null");
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            string connection = builder.Configuration.GetConnectionString("connection");
-            builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connection));
-            builder.Services.AddTransient<ItemRepository>();
+            builder.Services.AddTransient<IItemRepository, ItemRepository>();
             builder.Services.AddTransient<ItemService>();
-            builder.Services.AddDbContext<ApiContext>(o => o.UseInMemoryDatabase("MyDatabase"));
+            builder.Services.AddDbContext<ApiContext>(o => o.UseNpgsql(connection));
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -41,7 +37,6 @@ namespace ItemShop
             app.UseMiddleware<GlobalExceptionMiddleware>();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

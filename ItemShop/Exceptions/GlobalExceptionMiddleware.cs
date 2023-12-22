@@ -1,10 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Newtonsoft.Json;
-using System;
+﻿using Newtonsoft.Json;
 using System.Net;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ItemShop.Exceptions
 {
@@ -37,9 +32,6 @@ namespace ItemShop.Exceptions
             {
                 case NotFoundException e:
                     response.StatusCode = (int)HttpStatusCode.NotFound;
-                    break;
-                case SqlException e:
-                    response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
                 default:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;

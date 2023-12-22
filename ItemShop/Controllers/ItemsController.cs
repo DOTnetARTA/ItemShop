@@ -17,32 +17,38 @@ namespace ItemShop.Controllers
         }
 
         [HttpGet]
-        public async Task <IActionResult> GetItems()
+        public async Task<IActionResult> Get()
         {
-            return Ok(_itemService.GetItems());
+            return Ok(await _itemService.Get());
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetItem(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return Ok(_itemService.GetItem(id));
+            return Ok(await _itemService.Get(id));
         }
+
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItem(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _itemService.DeleteItem(id);
+            await _itemService.Delete(id);
+
             return Ok();
         }
+
         [HttpPut]
-        public async Task<IActionResult> UpdateItem(ItemForUpdateDto item)
+        public async Task<IActionResult> Update(ItemForUpdateDto item)
         {
-            await _itemService.UpdateItem(item);
+            await _itemService.Update(item);
+
             return Ok();
         }
+
         [HttpPost]
-        public async Task<IActionResult> CreateItem(ItemForCreateDto item)
+        public async Task<IActionResult> Create(ItemForCreateDto item)
         {
-            _itemService.CreateItem(item);
+            await _itemService.Create(item);
+
             return Ok();
         }
     }

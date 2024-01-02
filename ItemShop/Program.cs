@@ -1,6 +1,8 @@
 
 using EFCoreInMemoryDbDemo;
+using ItemShop.Client;
 using ItemShop.Exceptions;
+using ItemShop.Interfaces;
 using ItemShop.Repositories;
 using ItemShop.Services;
 using Microsoft.EntityFrameworkCore;
@@ -21,9 +23,20 @@ namespace ItemShop
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddTransient<IJsonPlaceholderClient, JsonPlaceholderClient>();
             builder.Services.AddTransient<IItemRepository, ItemRepository>();
-            builder.Services.AddTransient<ItemService>();
+            builder.Services.AddTransient<IShopsRepository, ShopsRepository>();
+            builder.Services.AddTransient<IOrdersRepository, OrdersRepository>();
+
+            builder.Services.AddTransient<ShopsService>();
+            builder.Services.AddTransient<ItemsService>();
+            builder.Services.AddTransient<UsersService>();
+
+
+
             builder.Services.AddDbContext<ApiContext>(o => o.UseNpgsql(connection));
+
+            builder.Services.AddHttpClient();
 
             var app = builder.Build();
 

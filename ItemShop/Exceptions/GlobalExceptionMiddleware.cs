@@ -28,6 +28,7 @@ namespace ItemShop.Exceptions
         {
             var response = context.Response;
             response.ContentType = "application/json";
+
             switch (ex)
             {
                 case NotFoundException e:

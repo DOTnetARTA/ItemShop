@@ -3,6 +3,8 @@ using Dapper;
 using EFCoreInMemoryDbDemo;
 using ItemShop.Dtos;
 using ItemShop.Entities;
+using ItemShop.Exceptions;
+using ItemShop.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Xml.Linq;
@@ -50,6 +52,15 @@ namespace ItemShop.Repositories
             _context.Items.Add(itemEntity);
 
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<ItemEntity?> GetItemByShopId(int itemId, int shopId)
+        {
+            ItemEntity? item = await _context.Items
+                .Include(i => i.Shop)
+                .FirstOrDefaultAsync(i => i.Id == itemId && i.ShopId == shopId);
+
+            return item;
         }
     }
 }

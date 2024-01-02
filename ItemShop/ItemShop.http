@@ -1,4 +1,4 @@
-@ItemShop_HostAddress = http://localhost:5062
+z@ItemShop_HostAddress = http://localhost:5062
 
 GET {{ItemShop_HostAddress}}/weatherforecast/
 Accept: application/json

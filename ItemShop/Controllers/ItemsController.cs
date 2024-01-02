@@ -9,9 +9,9 @@ namespace ItemShop.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        private readonly ItemService _itemService;
+        private readonly ItemsService _itemService;
 
-        public ItemsController(ItemService itemService)
+        public ItemsController(ItemsService itemService)
         {
             _itemService = itemService;
         }
@@ -51,5 +51,13 @@ namespace ItemShop.Controllers
 
             return Ok();
         }
+
+        [HttpPost("{itemId}/buy")]
+        public async Task<IActionResult> buy(int itemId, ItemToBuyDto data)
+        {
+  
+            return Ok(await _itemService.Buy(itemId, data));
+        }
+
     }
 }
